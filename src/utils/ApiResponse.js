@@ -4,3 +4,4 @@ class ApiResponse {
         this.data = data
     }
 }
+export { ApiResponse }
