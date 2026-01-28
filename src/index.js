@@ -1,30 +1,10 @@
 import dotenv from "dotenv"
-import express from "express";
 import mongoose from "mongoose";
-import { ApiError } from "./utils/ApiError.js";
+import { app } from "./app.js";
 dotenv.config({
     path: "./.env"
 })
 
-const app = express()
-
-app.use(express.json())
-
-app.use(
-    (err, req, res, next) => {
-        if (err instanceof ApiError) {
-            return res.status(err.statusCode || 500).json({
-                success: err.success,
-                error: err.error,
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            error: err.error || "Internal Server Error",
-        });
-    }
-)
 
 async function connectDB() {
     try {
@@ -36,4 +16,12 @@ async function connectDB() {
     }
 }
 
-connectDB()
+connectDB().then(
+    () => {
+        app.listen(8000, () => {
+            console.log(`Server running at http://localhost:${process.env.PORT}`);
+        })
+    }
+).catch((error) => {
+    console.log(error)
+})

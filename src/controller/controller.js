@@ -1,5 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
+import { Class } from "../models/class.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const signUp = async (req, res) => {
@@ -35,7 +36,7 @@ const signUp = async (req, res) => {
             role,
         })
 
-        return res.status(200).json(
+        return res.status(201).json(
             new ApiResponse({
                 success: true,
                 data: user,
@@ -92,6 +93,43 @@ const signIn = async (req, res) => {
     }
 }
 
-/// to access me pass middleware check.
+const currentUser = async (req, res) => {
+    try {
+        return res.status(200).json(
+            new ApiResponse({
+                success: true,
+                data: req.user,
+            })
+        );
+    } catch (error) {
+        throw error;
+    }
+};
 
-export { signUp, signIn }
+const createClass = async (req, res) => {
+    try {
+        const { className } = req.body
+        if (!className) {
+            throw new ApiError({
+                statusCode: 400,
+                error: "Invalid request schema",
+                success: false,
+            })
+        }
+
+        const createdClass = await Class.create({
+            className,
+            teacherId: req.user._id
+        })
+        res.status(201).json(
+            new ApiResponse({
+                success: true,
+                data: createdClass
+            })
+        )
+    } catch (error) {
+        throw error;
+    }
+}
+
+export { signUp, signIn, currentUser, createClass }

@@ -2,7 +2,7 @@ import { ApiError } from "../utils/ApiError.js"
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js"
 
-export const verifyJwt = async (req, _, next) => {
+export const authMiddleware = async (req, _, next) => {
     try {
         const token = req.header("Authorization");
         console.log(`Token: ${token}`)
@@ -13,8 +13,11 @@ export const verifyJwt = async (req, _, next) => {
                 error: "Unauthorized, token missing or invalid"
             })
         }
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
-        const user = await User.findById(decodedToken?.userId).select('-password')
+
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decodedToken.userId).select("-password");
+
         if (!user) {
             throw new ApiError({
                 statusCode: 401,
@@ -24,9 +27,6 @@ export const verifyJwt = async (req, _, next) => {
         req.user = user
         next()
     } catch (error) {
-        throw new ApiError({
-            statusCode: 401,
-            error: error?.message || "Unauthorized, token missing or invalid"
-        })
+        next(error);
     }
-}
+};
