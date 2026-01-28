@@ -19,7 +19,7 @@ async function connectDB() {
 connectDB().then(
     () => {
         app.listen(8000, () => {
-            console.log(`Server running at http://localhost:${process.env.PORT}`);
+            console.log(`Server running at http://localhost:8000`);
         })
     }
 ).catch((error) => {

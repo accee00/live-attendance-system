@@ -1,6 +1,6 @@
 import express from "express";
 import { ApiError } from "./utils/ApiError.js";
-import { signUp, signIn, currentUser, createClass } from "./controller/controller.js";
+import { signUp, signIn, currentUser, createClass, addStudentToClass } from "./controller/controller.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { teacherMiddleware } from "./middleware/teacher.middleware.js"
 
@@ -12,8 +12,16 @@ app.post('/auth/signup', signUp);
 app.post('/auth/login', signIn);
 app.get('/auth/me', authMiddleware, currentUser);
 app.post('/class', authMiddleware, teacherMiddleware, createClass)
+app.post('/class/:id/add-student', authMiddleware, teacherMiddleware, addStudentToClass)
 
 app.use((err, req, res, next) => {
+
+    console.error("ERROR:", {
+        message: err.error,
+        path: req.originalUrl,
+        method: req.method,
+    });
+
     if (err instanceof ApiError) {
         return res.status(err.statusCode || 500).json({
             success: err.success,
