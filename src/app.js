@@ -19,12 +19,12 @@ app.post('/class/:id/add-student', authMiddleware, teacherMiddleware, addStudent
 app.get('/class/:id', authMiddleware, getClassDetail)
 app.get('/students', authMiddleware, teacherMiddleware, getAllStudent)
 app.get('/class/:id/my-attendance', authMiddleware, getMyAttendance)
-app.post('/attendance/start', authMiddleware, startAttendance)
+app.post('/attendance/start', authMiddleware, teacherMiddleware, startAttendance)
 
 app.use((err, req, res, next) => {
 
     console.error("ERROR:", {
-        message: err.error,
+        message: err.error || err.message,
         path: req.originalUrl,
         method: req.method,
     });

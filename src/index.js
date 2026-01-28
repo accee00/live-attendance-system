@@ -1,10 +1,12 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import mongoose from "mongoose";
+import http from "http";
 import { app } from "./app.js";
+import { initWebSocketServer } from "./websocket/Websocket.server.js";
+
 dotenv.config({
     path: "./.env"
-})
-
+});
 
 async function connectDB() {
     try {
@@ -16,12 +18,16 @@ async function connectDB() {
     }
 }
 
-connectDB().then(
-    () => {
-        app.listen(8000, () => {
-            console.log(`Server running at http://localhost:8000`);
-        })
-    }
-).catch((error) => {
-    console.log(error)
-})
+connectDB().then(() => {
+    const server = http.createServer(app);
+    initWebSocketServer(server);
+    const PORT = 8000;
+    server.listen(PORT, () => {
+        console.log(`HTTP Server running on port ${PORT}`);
+        console.log(`WebSocket Server ready at ws://localhost:${PORT}/ws`);
+    });
+}).catch((error) => {
+    console.log("Startup error:", error);
+    process.exit(1);
+
+});

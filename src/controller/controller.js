@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
 import { Class } from "../models/class.model.js"
 import { Attendance } from "../models/attendance.model.js"
-
+import { getActiveSession, setActiveSession } from "../websocket/Websocket.server.js"
 
 const signUp = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
@@ -241,12 +241,6 @@ const startAttendance = asyncHandler(async (req, res) => {
         })
     }
 
-    if (!req.user || req.user.role !== "teacher") {
-        throw new ApiError({
-            statusCode: 403,
-            error: "Forbidden, teacher access required",
-        })
-    }
     const isClassTeacher = await Class.exists({
         _id: classId,
         teacherId: req.user._id,
@@ -258,19 +252,24 @@ const startAttendance = asyncHandler(async (req, res) => {
             error: "Forbidden, not class teacher or class not found",
         })
     }
+    const activeSession = getActiveSession();
 
-    const attendance = await Attendance.create({
-        classId,
-        startedAt: new Date().toISOString(),
-    })
+    if (activeSession) {
+        throw new ApiError({
+            statusCode: 409,
+            error: "Attendance session already active",
+        });
+    }
 
+    setActiveSession(classId)
 
     return res.status(200).json(
         new ApiResponse({
             success: true,
             data: {
-                classId: attendance.classId,
-                startedAt: attendance.startedAt,
+                message: "Attendance session started successfully",
+                classId: classId,
+                startedAt: new Date().toISOString(),
             },
         })
     )
