@@ -1,6 +1,9 @@
 import express from "express";
 import { ApiError } from "./utils/ApiError.js";
-import { signUp, signIn, currentUser, createClass, addStudentToClass } from "./controller/controller.js";
+import {
+    signUp, signIn, currentUser, createClass, addStudentToClass,
+    getClassDetail, getAllStudent, getMyAttendance, startAttendance
+} from "./controller/controller.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { teacherMiddleware } from "./middleware/teacher.middleware.js"
 
@@ -13,6 +16,10 @@ app.post('/auth/login', signIn);
 app.get('/auth/me', authMiddleware, currentUser);
 app.post('/class', authMiddleware, teacherMiddleware, createClass)
 app.post('/class/:id/add-student', authMiddleware, teacherMiddleware, addStudentToClass)
+app.get('/class/:id', authMiddleware, getClassDetail)
+app.get('/students', authMiddleware, teacherMiddleware, getAllStudent)
+app.get('/class/:id/my-attendance', authMiddleware, getMyAttendance)
+app.post('/attendance/start', authMiddleware, startAttendance)
 
 app.use((err, req, res, next) => {
 
